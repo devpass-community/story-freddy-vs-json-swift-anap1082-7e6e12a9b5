@@ -12,8 +12,17 @@ struct Service {
     func fetchList(of user: String, completion: @escaping ([Repository]?) -> Void) {
         guard let baseUrl = URL(string: "https://api.github.com/users/\(user)/repos") else { return }
         network.performGet(url: baseUrl) { (data) in
-            completion(repositories)
-            
+            if let data = data {
+                do {
+                    let repositories = try JSONDecoder().decode([Repository].self, from: data)
+                    completion(repositories)
+                } catch {
+                    print("Error\(error)")
+                    completion(nil)
+                }
+            } else {
+                completion(nil)
+            }
         }
     }
 }
